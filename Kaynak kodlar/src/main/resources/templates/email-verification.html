@@ -1,0 +1,688 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="tr">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hesap Doğrulama - Malibo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --primary-orange: #ff6b35;
+            --secondary-orange: #ff8c42;
+            --accent-orange: #ff9f1c;
+            --light-orange: #ffb347;
+            --dark-orange: #e55100;
+            --surface: #ffffff;
+            --surface-variant: #f8f9fa;
+            --on-surface: #1a1a1a;
+            --on-surface-variant: #6c757d;
+            --shadow: rgba(255, 107, 53, 0.15);
+            --shadow-dark: rgba(0, 0, 0, 0.1);
+            --shadow-medium: rgba(255, 107, 53, 0.25);
+            --success: #22c55e;
+            --error: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 25%, #ff9f1c 50%, #ffb347 75%, #ffc947 100%);
+            min-height: 100vh;
+            color: var(--on-surface);
+            position: relative;
+            overflow-x: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Floating background elements */
+        body::before,
+        body::after {
+            content: '';
+            position: fixed;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+            animation: float 8s ease-in-out infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        body::before {
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -150px;
+            animation-delay: 0s;
+        }
+
+        body::after {
+            width: 200px;
+            height: 200px;
+            bottom: -100px;
+            left: -100px;
+            animation-delay: 4s;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(180deg); }
+        }
+
+        /* Email Container */
+        .email-container {
+            max-width: 600px;
+            width: 100%;
+            background: var(--surface);
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow:
+                0 32px 64px var(--shadow-medium),
+                0 16px 32px var(--shadow-dark);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            position: relative;
+            z-index: 5;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Email Header */
+        .email-header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+            padding: 40px 40px 60px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .email-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            animation: shimmer 3s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .logo-icon {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .logo-text {
+            font-size: 32px;
+            font-weight: 800;
+            color: white;
+            letter-spacing: -1px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .email-title {
+            font-size: 28px;
+            font-weight: 800;
+            color: white;
+            margin-bottom: 12px;
+            text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .email-subtitle {
+            font-size: 16px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        /* Email Body */
+        .email-body {
+            padding: 40px;
+            position: relative;
+        }
+
+        .greeting {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--on-surface);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .greeting-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-orange), var(--accent-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+
+        .user-name {
+            color: var(--primary-orange);
+            font-weight: 800;
+        }
+
+        .message-text {
+            font-size: 16px;
+            color: var(--on-surface-variant);
+            line-height: 1.6;
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+
+        /* Verification Button */
+        .verification-section {
+            text-align: center;
+            margin: 40px 0;
+            position: relative;
+        }
+
+        .verification-button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            padding: 18px 36px;
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+            color: white;
+            text-decoration: none;
+            border-radius: 16px;
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 18px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 24px var(--shadow);
+            border: none;
+            cursor: pointer;
+        }
+
+        .verification-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+
+        .verification-button:hover {
+            background: linear-gradient(135deg, var(--dark-orange), var(--primary-orange));
+            transform: translateY(-3px);
+            box-shadow: 0 16px 32px var(--shadow-medium);
+        }
+
+        .verification-button:hover::before {
+            left: 100%;
+        }
+
+        .verification-button:active {
+            transform: translateY(-1px);
+        }
+
+        /* Security Notice */
+        .security-notice {
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 32px 0;
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+        }
+
+        .security-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--success);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .security-text {
+            flex: 1;
+        }
+
+        .security-title {
+            font-weight: 700;
+            color: var(--success);
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        .security-description {
+            color: var(--on-surface-variant);
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        /* Email Footer */
+        .email-footer {
+            background: var(--surface-variant);
+            padding: 32px 40px;
+            text-align: center;
+            border-top: 1px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .footer-text {
+            color: var(--on-surface-variant);
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 16px;
+        }
+
+        .team-signature {
+            font-weight: 700;
+            color: var(--primary-orange);
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .team-icon {
+            width: 24px;
+            height: 24px;
+            background: linear-gradient(135deg, var(--primary-orange), var(--accent-orange));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 12px;
+        }
+
+        /* Alternative Link */
+        .alternative-link {
+            background: var(--surface-variant);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 24px;
+            border: 1px solid rgba(255, 107, 53, 0.1);
+        }
+
+        .alternative-title {
+            font-weight: 700;
+            color: var(--on-surface);
+            margin-bottom: 12px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .alternative-url {
+            word-break: break-all;
+            color: var(--primary-orange);
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            background: rgba(255, 107, 53, 0.1);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 107, 53, 0.2);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .email-container {
+                margin: 0;
+                border-radius: 16px;
+            }
+
+            .email-header {
+                padding: 32px 24px 48px;
+            }
+
+            .email-body {
+                padding: 32px 24px;
+            }
+
+            .email-footer {
+                padding: 24px;
+            }
+
+            .logo-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 24px;
+            }
+
+            .logo-text {
+                font-size: 28px;
+            }
+
+            .email-title {
+                font-size: 24px;
+            }
+
+            .verification-button {
+                padding: 16px 28px;
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 16px;
+            }
+
+            .email-header {
+                padding: 24px 20px 36px;
+            }
+
+            .email-body {
+                padding: 24px 20px;
+            }
+
+            .email-footer {
+                padding: 20px;
+            }
+
+            .logo-text {
+                font-size: 24px;
+            }
+
+            .email-title {
+                font-size: 20px;
+            }
+
+            .greeting {
+                font-size: 18px;
+                flex-direction: column;
+                text-align: center;
+                gap: 8px;
+            }
+
+            .verification-button {
+                width: 100%;
+                padding: 16px 24px;
+            }
+
+            .security-notice {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            body {
+                background: white;
+            }
+
+            .email-container {
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+
+            .verification-button {
+                background: var(--primary-orange) !important;
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --surface: rgba(26, 26, 26, 0.95);
+                --surface-variant: #2d2d2d;
+                --on-surface: #ffffff;
+                --on-surface-variant: #a8a8a8;
+                --shadow: rgba(0, 0, 0, 0.3);
+                --shadow-dark: rgba(0, 0, 0, 0.5);
+            }
+
+            .email-container {
+                background: var(--surface);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+            }
+
+            .email-footer {
+                background: var(--surface-variant);
+            }
+
+            .security-notice {
+                background: rgba(34, 197, 94, 0.15);
+            }
+
+            .alternative-link {
+                background: var(--surface-variant);
+            }
+        }
+
+        /* Accessibility */
+        .verification-button:focus {
+            outline: 2px solid rgba(255, 255, 255, 0.8);
+            outline-offset: 2px;
+        }
+
+        /* Animation delays for staggered effect */
+        .greeting { animation-delay: 0.1s; }
+        .message-text { animation-delay: 0.2s; }
+        .verification-section { animation-delay: 0.3s; }
+        .security-notice { animation-delay: 0.4s; }
+
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <!-- Email Header -->
+    <div class="email-header">
+        <div class="logo-container">
+            <div class="logo-icon">E</div>
+            <span class="logo-text">Malibo</span>
+        </div>
+        <h1 class="email-title">Hesap Doğrulama</h1>
+        <p class="email-subtitle">Hesabınızı aktifleştirmek için son bir adım kaldı!</p>
+    </div>
+
+    <!-- Email Body -->
+    <div class="email-body">
+        <div class="greeting">
+            <div class="greeting-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <span>Merhaba <span class="user-name" th:text="${name}">Kullanıcı</span>! 👋</span>
+        </div>
+
+        <p class="message-text">
+            Malibo'ya hoş geldiniz! Hesabınızı başarıyla oluşturdunuz.
+            Şimdi hesabınızı doğrulamak ve tüm özelliklerden yararlanmaya başlamak için
+            aşağıdaki doğrulama butonuna tıklamanız yeterli.
+        </p>
+
+        <!-- Verification Button -->
+        <div class="verification-section">
+            <a th:href="${verificationUrl}" class="verification-button" target="_blank">
+                <i class="fas fa-shield-check"></i>
+                Hesabımı Doğrula
+            </a>
+        </div>
+
+        <!-- Security Notice -->
+        <div class="security-notice">
+            <div class="security-icon">
+                <i class="fas fa-lock"></i>
+            </div>
+            <div class="security-text">
+                <div class="security-title">Güvenlik Bildirimi</div>
+                <div class="security-description">
+                    Bu doğrulama linki sadece sizin için oluşturulmuştur ve 24 saat geçerlidir.
+                    Eğer bu e-postayı siz talep etmediyseniz, güvenle görmezden gelebilirsiniz.
+                </div>
+            </div>
+        </div>
+
+        <!-- Alternative Link -->
+        <div class="alternative-link">
+            <div class="alternative-title">Buton çalışmıyor mu?</div>
+            <div>Aşağıdaki linki kopyalayıp tarayıcınıza yapıştırabilirsiniz:</div>
+            <div class="alternative-url" th:text="${verificationUrl}">
+                https://malibo.com/verify/...
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Footer -->
+    <div class="email-footer">
+        <p class="footer-text">
+            Bu e-posta otomatik olarak gönderilmiştir. Lütfen bu e-postaya yanıt vermeyin.<br/>
+            Sorularınız için <strong>destek@malibo.com</strong> adresine yazabilirsiniz.
+        </p>
+        <div class="team-signature">
+            <div class="team-icon">
+                <i class="fas fa-heart"></i>
+            </div>
+            <span>Malibo Takımı ile sevgiler</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Email interaction enhancements
+    document.addEventListener('DOMContentLoaded', function() {
+        // Logo animation on click
+        const logoIcon = document.querySelector('.logo-icon');
+        if (logoIcon) {
+            logoIcon.addEventListener('click', function() {
+                this.style.animation = 'none';
+                setTimeout(() => {
+                    this.style.animation = '';
+                }, 10);
+            });
+        }
+
+        // Verification button click tracking
+        const verificationButton = document.querySelector('.verification-button');
+        if (verificationButton) {
+            verificationButton.addEventListener('click', function() {
+                // Add click animation
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+
+                // Optional: Track click event
+                console.log('Verification button clicked');
+            });
+        }
+
+        // Copy alternative URL functionality
+        const alternativeUrl = document.querySelector('.alternative-url');
+        if (alternativeUrl) {
+            alternativeUrl.addEventListener('click', function() {
+                // Try to copy to clipboard
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(this.textContent).then(() => {
+                        // Show feedback
+                        const originalText = this.textContent;
+                        this.textContent = '✓ Kopyalandı!';
+                        this.style.color = 'var(--success)';
+
+                        setTimeout(() => {
+                            this.textContent = originalText;
+                            this.style.color = '';
+                        }, 2000);
+                    });
+                }
+            });
+
+            // Add hover effect
+            alternativeUrl.style.cursor = 'pointer';
+            alternativeUrl.title = 'Kopyalamak için tıklayın';
+        }
+
+        // Animate elements on load
+        const animatedElements = document.querySelectorAll('.greeting, .message-text, .verification-section, .security-notice');
+        animatedElements.forEach((element, index) => {
+            element.style.opacity = '0';
+            element.style.transform = 'translateY(20px)';
+
+            setTimeout(() => {
+                element.style.transition = 'all 0.6s ease-out';
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }, 100 * (index + 1));
+        });
+    });
+
+    // Print functionality
+    function printEmail() {
+        window.print();
+    }
+
+    // Add keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl+P for print
+        if (e.ctrlKey && e.key === 'p') {
+            e.preventDefault();
+            printEmail();
+        }
+    });
+</script>
+</body>
+</html>

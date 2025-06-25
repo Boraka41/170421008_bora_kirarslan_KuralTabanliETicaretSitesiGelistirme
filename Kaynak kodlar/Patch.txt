@@ -1,0 +1,6 @@
+- Ürün detayları artık açılır buton ile gösteriliyor ve skora etkisi tutuluyor.
+- Ürüne yorum yapabilme özelliği ve skora etkisi eklendi.
+- Ürünü değerlendirme ve skora etkisi eklendi.
+- Artık kullanıcılar geçmiş satın alım tutarlarına göre belli statüler kazanıyor. (Standart, Bronz, Gümüş, Altın, Elmas)
+- Kullanıcıların aktiviteleri artık statülerine göre değer kazanıyor. (Standart çarpanı: 0.15, 100 skor. Nihai skor: 100 * 0.15 = 15 puan)
+- Kullanıcıların hangi statüde olduğunu profil sayfalarında gösteren bir progress barı var.

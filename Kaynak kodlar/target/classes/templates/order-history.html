@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sipariş Geçmişi - E-Commerce</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css"/>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+        --primary-orange: #ff6b35;
+        --secondary-orange: #ff8c42;
+        --accent-orange: #ff9f1c;
+        --light-orange: #ffb347;
+        --dark-orange: #e55100;
+        --surface: #ffffff;
+        --surface-variant: #f8f9fa;
+        --on-surface: #1a1a1a;
+        --on-surface-variant: #6c757d;
+        --shadow: rgba(255, 107, 53, 0.15);
+        --shadow-dark: rgba(0, 0, 0, 0.1);
+        --shadow-medium: rgba(255, 107, 53, 0.25);
+        --success: #22c55e;
+        --error: #ef4444;
+        --warning: #f59e0b;
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Outfit', sans-serif;
+        background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 25%, #ff9f1c 50%, #ffb347 75%, #ffc947 100%);
+        min-height: 100vh;
+        color: var(--on-surface);
+        position: relative;
+        overflow-x: hidden;
+    }
+
+    /* Floating background elements */
+    body::before,
+    body::after {
+        content: '';
+        position: fixed;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+        animation: float 8s ease-in-out infinite;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    body::before {
+        width: 320px;
+        height: 320px;
+        top: -160px;
+        right: -160px;
+        animation-delay: 0s;
+    }
+
+    body::after {
+        width: 220px;
+        height: 220px;
+        bottom: -110px;
+        left: -110px;
+        animation-delay: 4s;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0px) rotate(0deg); }
+        50% { transform: translateY(-25px) rotate(180deg); }
+    }
+
+    /* Header */
+    header {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 20px 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        z-index: 10;
+        box-shadow: 0 8px 32px rgba(255, 107, 53, 0.1);
+    }
+
+    .logo-container {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        text-decoration: none;
+        color: white;
+        transition: transform 0.3s ease;
+    }
+
+    .logo-container:hover {
+        transform: scale(1.05);
+    }
+
+    .logo-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        font-weight: 800;
+        transition: all 0.3s ease;
+    }
+
+    .logo-text {
+        font-size: 24px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+
+    .header-buttons {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+    }
+
+    .cart-button,
+    .profile-button {
+        padding: 12px 20px;
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 12px;
+        cursor: pointer;
+        font-family: 'Outfit', sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .cart-button:hover,
+    .profile-button:hover {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--primary-orange);
+        transform: translateY(-2px);
+    }
+
+    /* Page Title */
+    .page-title {
+        text-align: center;
+        margin: 40px 0;
+        color: white;
+        font-weight: 800;
+        font-size: 36px;
+        text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        letter-spacing: -0.5px;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* Container */
+    .container {
+        max-width: 1000px;
+        margin: 0 auto 50px;
+        padding: 0 30px;
+        position: relative;
+        z-index: 5;
+    }
+
+    /* Empty State */
+    .empty-state {
+        background: var(--surface);
+        border-radius: 24px;
+        padding: 60px 40px;
+        text-align: center;
+        box-shadow: 0 32px 64px var(--shadow-medium);
+        animation: slideUp 0.6s ease-out;
+    }
+
+    .empty-icon {
+        font-size: 64px;
+        color: var(--on-surface-variant);
+        margin-bottom: 24px;
+    }
+
+    .empty-title {
+        font-size: 24px;
+        font-weight: 700;
+        color: var(--on-surface);
+        margin-bottom: 12px;
+    }
+
+    .empty-subtitle {
+        color: var(--on-surface-variant);
+        font-size: 16px;
+        margin-bottom: 32px;
+    }
+
+    .shop-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 32px;
+        background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+        color: white;
+        text-decoration: none;
+        border-radius: 16px;
+        font-weight: 700;
+        font-size: 16px;
+        transition: all 0.3s ease;
+        box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .shop-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 16px 32px var(--shadow-medium);
+    }
+
+    /* Order Cards */
+    .order-card {
+        background: var(--surface);
+        border-radius: 20px;
+        padding: 30px;
+        margin-bottom: 24px;
+        box-shadow: 0 16px 32px var(--shadow-dark);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+        transition: all 0.3s ease;
+    }
+
+    .order-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 24px 48px var(--shadow-medium);
+    }
+
+    .order-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-orange), var(--accent-orange));
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Order Header */
+    .order-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid var(--surface-variant);
+    }
+
+    .order-info h3 {
+        font-size: 20px;
+        font-weight: 700;
+        color: var(--on-surface);
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .order-date {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        font-weight: 500;
+    }
+
+    .order-total {
+        text-align: right;
+    }
+
+    .total-label {
+        color: var(--on-surface-variant);
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .total-amount {
+        font-size: 24px;
+        font-weight: 800;
+        color: var(--success);
+    }
+
+    /* Order Details */
+    .order-details {
+        margin-bottom: 20px;
+    }
+
+    .detail-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 12px;
+        padding: 12px;
+        background: var(--surface-variant);
+        border-radius: 12px;
+    }
+
+    .detail-icon {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--primary-orange), var(--accent-orange));
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 14px;
+    }
+
+    .detail-content {
+        flex: 1;
+    }
+
+    .detail-label {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--on-surface-variant);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 2px;
+    }
+
+    .detail-value {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--on-surface);
+    }
+
+    /* Order Items */
+    .order-items {
+        background: var(--surface-variant);
+        border-radius: 16px;
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .items-header {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--on-surface);
+        margin-bottom: 16px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .item-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255, 107, 53, 0.1);
+    }
+
+    .item-row:last-child {
+        border-bottom: none;
+    }
+
+    .item-info {
+        flex: 1;
+    }
+
+    .item-name {
+        font-weight: 600;
+        color: var(--on-surface);
+        margin-bottom: 4px;
+    }
+
+    .item-details {
+        font-size: 14px;
+        color: var(--on-surface-variant);
+    }
+
+    .item-total {
+        font-weight: 700;
+        color: var(--primary-orange);
+        font-size: 16px;
+    }
+
+    /* Back Button */
+    .back-button {
+        position: fixed;
+        top: 50%;
+        left: 30px;
+        transform: translateY(-50%);
+        width: 50px;
+        height: 50px;
+        background: rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        font-size: 20px;
+        transition: all 0.3s ease;
+        z-index: 20;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .back-button:hover {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--primary-orange);
+        transform: translateY(-50%) scale(1.1);
+        box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .container {
+            padding: 0 20px;
+        }
+
+        .order-card {
+            padding: 24px 20px;
+        }
+
+        .order-header {
+            flex-direction: column;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .order-total {
+            text-align: left;
+        }
+
+        .page-title {
+            font-size: 28px;
+        }
+
+        .back-button {
+            left: 20px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            padding: 0 16px;
+        }
+
+        .order-card {
+            padding: 20px 16px;
+        }
+
+        .page-title {
+            font-size: 24px;
+        }
+
+        .back-button {
+            left: 16px;
+            width: 45px;
+            height: 45px;
+            font-size: 18px;
+        }
+    }
+  </style>
+</head>
+<body>
+<header>
+  <a href="/index" class="logo-container">
+    <div class="logo-icon">E</div>
+    <span class="logo-text">Malibo</span>
+  </a>
+  <div class="header-buttons">
+    <a href="/cart" class="cart-button">
+      <i class="fas fa-shopping-cart"></i>
+      Sepet
+    </a>
+    <a href="/profile" class="profile-button">
+      <i class="fas fa-user"></i>
+      Profil
+    </a>
+  </div>
+</header>
+
+<button class="back-button" onclick="history.back()" title="Geri Dön">
+  <i class="fas fa-arrow-left"></i>
+</button>
+
+<h1 class="page-title">📋 Sipariş Geçmişi</h1>
+
+<div class="container">
+  <!-- Empty State -->
+  <div th:if="${orders == null or orders.isEmpty()}" class="empty-state">
+    <div class="empty-icon">
+      <i class="fas fa-clipboard-list"></i>
+    </div>
+    <h2 class="empty-title">Henüz Siparişiniz Yok</h2>
+    <p class="empty-subtitle">İlk siparişinizi vermek için alışverişe başlayın!</p>
+    <a href="/index" class="shop-button">
+      <i class="fas fa-shopping-bag"></i>
+      Alışverişe Başla
+    </a>
+  </div>
+
+  <!-- Order History -->
+  <div th:each="order : ${orders}" class="order-card">
+    <div class="order-header">
+      <div class="order-info">
+        <h3>
+          <i class="fas fa-receipt"></i>
+          Sipariş #<span th:text="${order.orderNumber ?: order.id}">001</span>
+        </h3>
+        <div class="order-date" th:text="${#temporals.format(order.orderDate, 'dd MMMM yyyy HH:mm')}">
+          15 Ocak 2024 14:30
+        </div>
+      </div>
+      <div class="order-total">
+        <div class="total-label">Toplam Tutar</div>
+        <div class="total-amount">₺<span th:text="${#numbers.formatDecimal(order.totalAmount, 2, 2)}">125.50</span></div>
+      </div>
+    </div>
+
+    <div class="order-details">
+      <div class="detail-row">
+        <div class="detail-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="detail-content">
+          <div class="detail-label">Müşteri</div>
+          <div class="detail-value" th:text="${order.customerName}">John Doe</div>
+        </div>
+      </div>
+
+      <div class="detail-row">
+        <div class="detail-icon">
+          <i class="fas fa-map-marker-alt"></i>
+        </div>
+        <div class="detail-content">
+          <div class="detail-label">Teslimat Adresi</div>
+          <div class="detail-value" th:text="${order.deliveryAddress}">İstanbul, Türkiye</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-items">
+      <div class="items-header">
+        <i class="fas fa-box"></i>
+        Sipariş Detayları
+      </div>
+
+      <!-- Sipariş items'larını göster -->
+      <div th:if="${orderItemsMap != null and orderItemsMap.containsKey(order.id) and !orderItemsMap[order.id].isEmpty()}">
+        <div th:each="item : ${orderItemsMap[order.id]}" class="item-row">
+          <div class="item-info">
+            <div class="item-name" th:text="${item.productName}">Ürün Adı</div>
+            <div class="item-details">
+              <span th:text="${item.quantity}">2</span> adet ×
+              ₺<span th:text="${#numbers.formatDecimal(item.unitPrice, 2, 2)}">50.00</span>
+            </div>
+          </div>
+          <div class="item-total">
+            ₺<span th:text="${#numbers.formatDecimal(item.totalPrice, 2, 2)}">100.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Eğer items yoksa veya boşsa -->
+      <div th:if="${orderItemsMap == null or !orderItemsMap.containsKey(order.id) or orderItemsMap[order.id].isEmpty()}"
+           class="item-row">
+        <div class="item-info">
+          <div class="item-name">Sipariş detayları yüklenemedi</div>
+          <div class="item-details">Lütfen daha sonra tekrar deneyin</div>
+        </div>
+        <div class="item-total">-</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

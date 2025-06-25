@@ -1,0 +1,1136 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Home - E-Commerce</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap');
+
+    :root {
+      --primary-orange: #ff6b35;
+      --secondary-orange: #ff8c42;
+      --accent-orange: #ff9f1c;
+      --light-orange: #ffb347;
+      --dark-orange: #e55100;
+      --surface: #ffffff;
+      --surface-variant: #f8f9fa;
+      --on-surface: #1a1a1a;
+      --on-surface-variant: #6c757d;
+      --shadow: rgba(255, 107, 53, 0.15);
+      --shadow-dark: rgba(0, 0, 0, 0.1);
+      --shadow-medium: rgba(255, 107, 53, 0.25);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Outfit', sans-serif;
+      background: linear-gradient(135deg, #ff6b35 0%, #ff8c42 25%, #ff9f1c 50%, #ffb347 75%, #ffc947 100%);
+      min-height: 100vh;
+      color: var(--on-surface);
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    /* Floating background elements */
+    body::before,
+    body::after {
+      content: '';
+      position: fixed;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.08);
+      animation: float 8s ease-in-out infinite;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    body::before {
+      width: 400px;
+      height: 400px;
+      top: -200px;
+      right: -200px;
+      animation-delay: 0s;
+    }
+
+    body::after {
+      width: 300px;
+      height: 300px;
+      bottom: -150px;
+      left: -150px;
+      animation-delay: 4s;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px) rotate(0deg); }
+      50% { transform: translateY(-30px) rotate(180deg); }
+    }
+
+    /* Header */
+    header {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+      color: white;
+      padding: 20px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      z-index: 10;
+      box-shadow: 0 8px 32px rgba(255, 107, 53, 0.1);
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: white;
+      transition: transform 0.3s ease;
+    }
+
+    .logo-container:hover {
+      transform: scale(1.05);
+    }
+
+    .logo-icon {
+      width: 40px;
+      height: 40px;
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 800;
+      transition: all 0.3s ease;
+    }
+
+    .logo-icon:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: rotate(5deg);
+    }
+
+    .logo-text {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .header-buttons {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .profile-button,
+    .logout-button,
+    .cart-button {
+      padding: 12px 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 12px;
+      cursor: pointer;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(10px);
+    }
+
+    .profile-button::before,
+    .logout-button::before,
+    .cart-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .profile-button:hover,
+    .cart-button:hover {
+      background: rgba(255, 255, 255, 0.9);
+      color: var(--primary-orange);
+      border-color: rgba(255, 255, 255, 0.9);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
+    }
+
+    .logout-button:hover {
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border-color: rgba(239, 68, 68, 0.9);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    }
+
+    .profile-button:hover::before,
+    .logout-button:hover::before,
+    .cart-button:hover::before {
+      left: 100%;
+    }
+
+    /* Main Content */
+    .main-content {
+      position: relative;
+      z-index: 5;
+      padding: 40px 20px;
+    }
+
+    .welcome-section {
+      text-align: center;
+      margin-bottom: 50px;
+      color: white;
+    }
+
+    .welcome-title {
+      font-size: 48px;
+      font-weight: 800;
+      margin-bottom: 16px;
+      text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+      letter-spacing: -1px;
+    }
+
+    .welcome-subtitle {
+      font-size: 18px;
+      font-weight: 400;
+      opacity: 0.9;
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* Category Container */
+    .category-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    .category-card {
+      background: var(--surface);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      box-shadow:
+        0 20px 40px var(--shadow),
+        0 8px 16px var(--shadow-dark);
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(20px);
+    }
+
+    .category-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary-orange), var(--accent-orange));
+      border-radius: 20px 20px 0 0;
+    }
+
+    .category-card::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 0;
+      height: 0;
+      background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
+      border-radius: 50%;
+      transition: all 0.6s ease;
+      transform: translate(-50%, -50%);
+      z-index: 1;
+    }
+
+    .category-card:hover {
+      transform: translateY(-12px) scale(1.02);
+      box-shadow:
+        0 32px 64px var(--shadow-medium),
+        0 16px 32px var(--shadow-dark);
+    }
+
+    .category-card:hover::after {
+      width: 300px;
+      height: 300px;
+    }
+
+    .category-card a {
+      display: block;
+      text-decoration: none;
+      color: inherit;
+      position: relative;
+      z-index: 2;
+    }
+
+    .category-icon {
+      width: 64px;
+      height: 64px;
+      background: linear-gradient(135deg, var(--primary-orange), var(--accent-orange));
+      border-radius: 16px;
+      margin: 0 auto 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      transition: all 0.3s ease;
+      box-shadow: 0 8px 24px var(--shadow);
+    }
+
+    .category-card:hover .category-icon {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: 0 12px 32px var(--shadow-medium);
+    }
+
+    .category-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--on-surface);
+      margin-bottom: 8px;
+      transition: color 0.3s ease;
+      letter-spacing: -0.3px;
+    }
+
+    .category-description {
+      font-size: 14px;
+      color: var(--on-surface-variant);
+      font-weight: 400;
+      line-height: 1.5;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: all 0.3s ease;
+    }
+
+    .category-card:hover .category-description {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .category-card:hover h3 {
+      color: var(--primary-orange);
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+      header {
+        padding: 16px 20px;
+        flex-direction: column;
+        gap: 16px;
+      }
+
+      .header-buttons {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .welcome-title {
+        font-size: 36px;
+      }
+
+      .welcome-subtitle {
+        font-size: 16px;
+      }
+
+      .category-container {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        padding: 0 16px;
+      }
+
+      .category-card {
+        padding: 24px 20px;
+      }
+
+      .category-icon {
+        width: 56px;
+        height: 56px;
+        font-size: 24px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .main-content {
+        padding: 30px 16px;
+      }
+
+      .welcome-section {
+        margin-bottom: 40px;
+      }
+
+      .welcome-title {
+        font-size: 28px;
+      }
+
+      .welcome-subtitle {
+        font-size: 14px;
+      }
+
+      .category-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .category-card {
+        padding: 20px 16px;
+      }
+
+      .profile-button,
+      .logout-button,
+      .cart-button {
+        padding: 10px 16px;
+        font-size: 13px;
+      }
+    }
+
+    /* Loading Animation */
+    .loading {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --surface: rgba(26, 26, 26, 0.95);
+        --on-surface: #ffffff;
+        --on-surface-variant: #a8a8a8;
+        --shadow: rgba(0, 0, 0, 0.3);
+        --shadow-dark: rgba(0, 0, 0, 0.5);
+      }
+
+      .category-card {
+        background: var(--surface);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+    }
+
+    /* Smooth scrolling */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Focus styles for accessibility */
+    .profile-button:focus,
+    .logout-button:focus,
+    .cart-button:focus,
+    .category-card:focus {
+      outline: 2px solid rgba(255, 255, 255, 0.8);
+      outline-offset: 2px;
+    }
+
+    /* Discount Pop-up Notification */
+    .discount-popup {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      background: linear-gradient(135deg, #22c55e, #16a34a);
+      color: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 
+        0 20px 40px rgba(34, 197, 94, 0.4),
+        0 8px 16px rgba(0, 0, 0, 0.2);
+      z-index: 1000;
+      max-width: 450px;
+      width: 90%;
+      text-align: center;
+      backdrop-filter: blur(20px);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .discount-popup.show {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .discount-popup-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      backdrop-filter: blur(5px);
+      z-index: 999;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+
+    .discount-popup-overlay.show {
+      opacity: 1;
+      pointer-events: all;
+    }
+
+    .discount-popup-icon {
+      font-size: 48px;
+      margin-bottom: 20px;
+      animation: bounce 1s ease-in-out infinite;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .discount-popup h2 {
+      font-size: 24px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: white;
+    }
+
+    .discount-popup p {
+      font-size: 16px;
+      margin-bottom: 20px;
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .discount-popup-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .discount-popup-button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      min-width: 120px;
+    }
+
+    .discount-popup-button.primary {
+      background: white;
+      color: #16a34a;
+    }
+
+    .discount-popup-button.primary:hover {
+      background: #f8f8f8;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .discount-popup-button.secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .discount-popup-button.secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+      transform: translateY(-2px);
+    }
+
+    /* Responsive Design for Pop-up */
+    @media (max-width: 480px) {
+      .discount-popup {
+        padding: 24px 20px;
+        max-width: 90%;
+      }
+
+      .discount-popup-icon {
+        font-size: 36px;
+        margin-bottom: 16px;
+      }
+
+      .discount-popup h2 {
+        font-size: 20px;
+        margin-bottom: 10px;
+      }
+
+      .discount-popup p {
+        font-size: 14px;
+        margin-bottom: 16px;
+      }
+
+      .discount-popup-buttons {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .discount-popup-button {
+        padding: 10px 20px;
+        font-size: 13px;
+        min-width: auto;
+        width: 100%;
+      }
+    }
+
+    .search-bar {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #search-input {
+      width: 80%;
+      padding: 12px 16px;
+      font-size: 16px;
+      border: 1px solid var(--on-surface-variant);
+      border-radius: 8px;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+
+    #search-input:focus {
+      border-color: var(--primary-orange);
+      box-shadow: 0 4px 12px rgba(255, 107, 53, 0.2);
+    }
+
+    /* İndirimli Kategoriler Butonu */
+.discount-button {
+  padding: 12px 20px;
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  cursor: pointer;
+  font-family: 'Outfit', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+}
+
+.discount-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  transition: left 0.5s ease;
+}
+
+.discount-button:hover {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--primary-orange);
+  border-color: rgba(255, 255, 255, 0.9);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 255, 255, 0.3);
+}
+
+.discount-button:hover::before {
+  left: 100%;
+}
+
+.discount-button:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+    .discount-button:active {
+      transform: translateY(0);
+      box-shadow: none;
+    }
+
+    /* User Level Badge Styles */
+    .user-level-badge {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.15);
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      backdrop-filter: blur(10px);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .user-level-badge:hover {
+      background: rgba(255, 255, 255, 0.25);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+
+    .level-icon {
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+    }
+
+    .level-text {
+      font-weight: 700;
+      font-size: 14px;
+      color: white;
+      letter-spacing: 0.5px;
+    }
+
+    /* Level specific animations */
+    .diamond-icon {
+      animation: diamond-glow 2s ease-in-out infinite;
+    }
+
+    @keyframes diamond-glow {
+      0%, 100% { filter: drop-shadow(0 0 5px rgba(135, 206, 235, 0.5)); }
+      50% { filter: drop-shadow(0 0 10px rgba(135, 206, 235, 0.8)); }
+    }
+
+            .standard-icon {
+            color: #6b7280;
+        }
+
+        .gold-icon {
+            animation: gold-shine 3s ease-in-out infinite;
+        }
+
+        @keyframes gold-shine {
+            0%, 100% { filter: drop-shadow(0 0 3px rgba(255, 215, 0, 0.5)); }
+            50% { filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8)); }
+        }
+
+        /* Level Modal Styles */
+        .level-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .level-modal.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .level-modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 400px;
+            width: 90%;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+
+        .level-modal.show .level-modal-content {
+            transform: scale(1);
+        }
+
+        .level-modal-header {
+            background: linear-gradient(135deg, var(--primary-orange), var(--accent-orange));
+            color: white;
+            padding: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .level-modal-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 16px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .level-modal-icon.standard {
+            background: linear-gradient(135deg, #9ca3af, #6b7280);
+        }
+
+        .level-modal-icon.bronze {
+            background: linear-gradient(135deg, #cd7f32, #b8860b);
+        }
+
+        .level-modal-icon.silver {
+            background: linear-gradient(135deg, #c0c0c0, #a8a8a8);
+        }
+
+        .level-modal-icon.gold {
+            background: linear-gradient(135deg, #ffd700, #ffb347);
+        }
+
+        .level-modal-icon.diamond {
+            background: linear-gradient(135deg, #e0e0e0, #87ceeb);
+            animation: diamond-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes diamond-pulse {
+            0%, 100% { box-shadow: 0 0 10px rgba(135, 206, 235, 0.5); }
+            50% { box-shadow: 0 0 20px rgba(135, 206, 235, 0.8); }
+        }
+
+        .level-modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .level-modal-close {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 20px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .level-modal-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .level-modal-body {
+            padding: 24px;
+            text-align: center;
+        }
+
+        .level-modal-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .level-modal-amount {
+            background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(255, 159, 28, 0.1));
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            color: var(--primary-orange);
+        }
+
+        .level-modal-amount strong {
+            color: #333;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 480px) {
+            .level-modal-content {
+                width: 95%;
+                margin: 0 10px;
+            }
+
+            .level-modal-header {
+                padding: 20px;
+            }
+
+            .level-modal-icon {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .level-modal-title {
+                font-size: 16px;
+            }
+
+            .level-modal-body {
+                padding: 20px;
+            }
+        }
+
+  </style>
+</head>
+<body th:data-has-discounts="${hasDiscounts}" th:data-discount-count="${discountCount}" th:data-is-logged-in="${isLoggedIn}">
+<header>
+  <a href="/index" class="logo-container">
+    <div class="logo-icon">E</div>
+    <span class="logo-text">Malibo</span>
+  </a>
+  <div class="header-buttons">
+        <!-- User Level Badge -->
+    <div class="user-level-badge" th:if="${userLevel != null}" onclick="showLevelModal()">
+        <span class="level-icon" th:classappend="${userLevel == 'STANDART' ? 'standard-icon' : userLevel == 'BRONZ' ? 'bronze-icon' : userLevel == 'GUMUS' ? 'silver-icon' : userLevel == 'ALTIN' ? 'gold-icon' : 'diamond-icon'}">
+            <span th:if="${userLevel == 'STANDART'}">⭐</span>
+            <span th:if="${userLevel == 'BRONZ'}">🥉</span>
+            <span th:if="${userLevel == 'GUMUS'}">🥈</span>
+            <span th:if="${userLevel == 'ALTIN'}">🥇</span>
+            <span th:if="${userLevel == 'ELMAS'}">💎</span>
+        </span>
+        <span class="level-text" th:text="${userLevel == 'STANDART' ? 'Standart' : userLevel == 'BRONZ' ? 'Bronz' : userLevel == 'GUMUS' ? 'Gümüş' : userLevel == 'ALTIN' ? 'Altın' : 'Elmas'}">Standart</span>
+    </div>
+    
+    <button class="cart-button" onclick="window.location.href='/cart'">🛒 Sepet</button>
+    <button class="discount-button" onclick="window.location.href='/discount-categories'">💸 İndirimli Kategoriler</button>
+    <button class="profile-button" onclick="window.location.href='/profile'">👤 Profil</button>
+    <button class="logout-button" onclick="logout()">🚪 Çıkış Yap</button>
+  </div>
+</header>
+
+<div class="main-content">
+  <div class="welcome-section">
+    <h1 class="welcome-title">Hoş Geldiniz!</h1>
+    <p class="welcome-subtitle">Kategorilerimizi keşfedin ve istediğiniz ürünleri bulun</p>
+  </div>
+
+  <div class="search-bar">
+    <input type="text" id="search-input" placeholder="Kategori ara..." />
+  </div>
+
+  <div class="category-container">
+    <div th:each="category: ${categories}" class="category-card" tabindex="0">
+      <a th:href="@{/products(category=${category.id})}">
+        <div class="category-icon">🏷️</div>
+        <h3 th:text="${category.name}">Kategori Adı</h3>
+        <p class="category-description">Bu kategorideki ürünleri keşfedin</p>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Discount Pop-up -->
+<div class="discount-popup-overlay" id="discountOverlay"></div>
+<div class="discount-popup" id="discountPopup">
+  <div class="discount-popup-icon">🎉</div>
+  <h2>Harika Haberler!</h2>
+  <p id="discountMessage">Size özel indirimleriniz mevcut!</p>
+  <div class="discount-popup-buttons">
+    <button class="discount-popup-button primary" onclick="goToDiscounts()">İndirimleri Gör</button>
+    <button class="discount-popup-button secondary" onclick="closeDiscountPopup()">Sonra</button>
+  </div>
+</div>
+
+<!-- Level Modal -->
+<div class="level-modal" id="levelModal" style="display: none;">
+    <div class="level-modal-content">
+        <div class="level-modal-header">
+            <div class="level-modal-icon" th:classappend="${userLevel == 'STANDART' ? 'standard' : userLevel == 'BRONZ' ? 'bronze' : userLevel == 'GUMUS' ? 'silver' : userLevel == 'ALTIN' ? 'gold' : 'diamond'}">
+                <span th:if="${userLevel == 'STANDART'}">⭐</span>
+                <span th:if="${userLevel == 'BRONZ'}">🥉</span>
+                <span th:if="${userLevel == 'GUMUS'}">🥈</span>
+                <span th:if="${userLevel == 'ALTIN'}">🥇</span>
+                <span th:if="${userLevel == 'ELMAS'}">💎</span>
+            </div>
+            <h3 class="level-modal-title">
+                Şu anda <span th:text="${userLevel == 'STANDART' ? 'Standart' : userLevel == 'BRONZ' ? 'Bronz' : userLevel == 'GUMUS' ? 'Gümüş' : userLevel == 'ALTIN' ? 'Altın' : 'Elmas'}">Standart</span> seviyesindesiniz!
+            </h3>
+            <button class="level-modal-close" onclick="closeLevelModal()">
+                ×
+            </button>
+        </div>
+        <div class="level-modal-body">
+            <p class="level-modal-description">
+                Yapılan alışveriş tutarlarına göre kategorilerde indirim kazanma ihtimaliniz artıyor! 
+                Harcadıkça sizde devamlı müşterimiz olun ve avantajlardan faydalanın!
+            </p>
+        </div>
+    </div>
+</div>
+
+<script>
+  function logout() {
+    const button = event.target;
+    const originalText = button.innerHTML;
+
+    button.innerHTML = '<div class="loading"></div> Çıkış yapılıyor...';
+    button.disabled = true;
+
+    fetch('/logout', {
+      method: 'POST',
+      credentials: 'include'
+    })
+    .finally(() => {
+      setTimeout(() => {
+        window.location.href = '/login';
+      }, 1000);
+    });
+  }
+
+  // Discount Pop-up Functions
+  function showDiscountPopup() {
+    const overlay = document.getElementById('discountOverlay');
+    const popup = document.getElementById('discountPopup');
+    
+    overlay.classList.add('show');
+    setTimeout(() => {
+      popup.classList.add('show');
+    }, 100);
+  }
+
+  function closeDiscountPopup() {
+    const overlay = document.getElementById('discountOverlay');
+    const popup = document.getElementById('discountPopup');
+    
+    popup.classList.remove('show');
+    setTimeout(() => {
+      overlay.classList.remove('show');
+    }, 300);
+  }
+
+  function goToDiscounts() {
+    closeDiscountPopup();
+    setTimeout(() => {
+      window.location.href = '/discount-categories';
+    }, 400);
+  }
+
+  // Close popup when clicking on overlay
+  document.getElementById('discountOverlay').addEventListener('click', closeDiscountPopup);
+
+  // Close popup with Escape key
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+      closeDiscountPopup();
+      closeLevelModal();
+    }
+  });
+
+  // Level Modal Functions
+  function showLevelModal() {
+    const modal = document.getElementById('levelModal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      modal.classList.add('show');
+    }, 10);
+  }
+
+  function closeLevelModal() {
+    const modal = document.getElementById('levelModal');
+    modal.classList.remove('show');
+    setTimeout(() => {
+      modal.style.display = 'none';
+    }, 300);
+  }
+
+  // Close level modal when clicking outside
+  document.addEventListener('click', function(e) {
+    const modal = document.getElementById('levelModal');
+    if (e.target === modal) {
+      closeLevelModal();
+    }
+  });
+
+  // Enhanced category card interactions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Show discount popup if user has discounts
+    const hasDiscounts = document.body.dataset.hasDiscounts === 'true';
+    const discountCount = parseInt(document.body.dataset.discountCount) || 0;
+    const isLoggedIn = document.body.dataset.isLoggedIn === 'true';
+    
+    console.log('Discount check:', { hasDiscounts, discountCount, isLoggedIn });
+    
+    if (isLoggedIn && hasDiscounts) {
+      const message = discountCount === 1 
+        ? `${discountCount} kategoride size özel indirim mevcut!`
+        : `${discountCount} kategoride size özel indirimler mevcut!`;
+      
+      document.getElementById('discountMessage').textContent = message;
+      
+      // Show popup after a short delay for better UX
+      setTimeout(() => {
+        showDiscountPopup();
+      }, 1500);
+    }
+
+    const categoryCards = document.querySelectorAll('.category-card');
+
+    categoryCards.forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-12px) scale(1.02)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
+
+      // Keyboard navigation
+      card.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          this.querySelector('a').click();
+        }
+      });
+    });
+
+    // Logo animation on click
+    const logoIcon = document.querySelector('.logo-icon');
+    logoIcon.addEventListener('click', function() {
+      this.style.animation = 'none';
+      setTimeout(() => {
+        this.style.animation = '';
+      }, 10);
+    });
+
+    // Search functionality for categories
+    const searchInput = document.getElementById('search-input');
+    if (searchInput) {
+      searchInput.addEventListener('input', function() {
+        const searchText = searchInput.value.toLowerCase();
+        categoryCards.forEach(card => {
+          const categoryName = card.querySelector('h3').textContent.toLowerCase();
+          if (categoryName.includes(searchText)) {
+            card.style.display = 'block';
+          } else {
+            card.style.display = 'none';
+          }
+        });
+      });
+    }
+  });
+</script>
+</body>
+</html>
